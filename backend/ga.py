@@ -4,7 +4,7 @@ from ann import ann_model
 from fuzzy import fuzzy_system
 
 class AmbulanceGA:
-    def __init__(self, G, hospitals, start_node, urgency, pop_size=20, generations=50, mutation_rate=0.2):
+    def __init__(self, G, hospitals, start_node, urgency, pop_size=50, generations=30, mutation_rate=0.3):
         self.G = G
         self.hospitals = hospitals # List of dicts: {'node': id, 'capacity_load': 0/1/2}
         self.start_node = start_node
@@ -114,7 +114,14 @@ class AmbulanceGA:
         path = chromosome['path']
         hospital = chromosome['hospital']
         
-        if len(path) <= 2:
+        # 30% chance to completely mutate the target hospital
+        if random.random() < 0.3:
+            new_hospital = random.choice(self.hospitals)
+            new_path = self._generate_random_path(new_hospital['node'])
+            if new_path:
+                return {'path': new_path, 'hospital': new_hospital}
+                
+        if len(path) < 3:
             return chromosome
             
         # Pick a random intermediate node to mutate from
