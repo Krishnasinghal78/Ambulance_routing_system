@@ -29,8 +29,22 @@ def get_or_create_graph():
 
 def get_hospitals(G, num_hospitals=5):
     import osmnx as ox
+    import json
+    
+    HOSPITALS_CACHE_FILE = "hospitals_10km_cache.json"
+    
+    # Try loading from cache first
+    if os.path.exists(HOSPITALS_CACHE_FILE):
+        print("Loading hospitals from local cache (FAST)...")
+        with open(HOSPITALS_CACHE_FILE, 'r') as f:
+            cached_hospitals = json.load(f)
+            # Assign fresh random loads
+            for h in cached_hospitals:
+                h['capacity_load'] = random.choice([0, 1, 2])
+            return cached_hospitals[:num_hospitals]
+
     try:
-        print("Fetching real hospitals from OSM...")
+        print("Fetching real hospitals from OSM (takes a minute)...")
         tags = {'amenity': 'hospital'}
         hospitals_gdf = ox.features_from_address(CITY_QUERY, tags=tags, dist=10000)
         hospitals_gdf = hospitals_gdf.to_crs(epsg=4326)
@@ -51,15 +65,19 @@ def get_hospitals(G, num_hospitals=5):
             
             hospitals.append({
                 'id': f"H{count+1}",
-                'node': node_id,
+                'node': int(node_id),
                 'capacity_load': random.choice([0, 1, 2]),
                 'name': name,
-                'coords': {'lat': node_data['y'], 'lon': node_data['x']}
+                'coords': {'lat': float(node_data['y']), 'lon': float(node_data['x'])}
             })
             count += 1
             
         if len(hospitals) == 0:
             raise ValueError("No hospitals found.")
+            
+        # Save to cache so next restart is instant
+        with open(HOSPITALS_CACHE_FILE, 'w') as f:
+            json.dump(hospitals, f)
             
         return hospitals
     except Exception as e:
