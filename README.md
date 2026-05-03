@@ -1,6 +1,6 @@
 # Hybrid Soft Computing Framework for Real-Time Ambulance Routing
 
-This project implements an intelligent system for real-time ambulance routing using Genetic Algorithms (GA), Artificial Neural Networks (ANN), and Fuzzy Logic.
+This project implements an intelligent system for real-time ambulance routing using Genetic Algorithm (GA), Artificial Neural Networks (ANN), and Fuzzy Logic.
 
 ## Prerequisites
 - Python 3.9+
